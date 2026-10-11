@@ -1,1 +1,35 @@
+name: Build C++ to WebAssembly
 
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  build-wasm:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Emscripten SDK
+        uses: mymindstorm/setup-emsdk@v14
+        with:
+          version: latest
+
+      - name: Verify Emscripten Installation
+        run: emcc -v
+
+      - name: Run Build Script
+        run: |
+          chmod +x scripts/build-wasm.sh
+          bash scripts/build-wasm.sh
+
+      - name: Upload Compiled WASM Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: webassembly-output
+          path: public/wasm/
+          
