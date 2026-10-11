@@ -13,7 +13,7 @@ export default function Home() {
     
     try {
       await initConverter();
-      setStatus('Converting world buffer...');
+      setStatus('Converting world for console output...');
       await convertWorld();
       setStatus('Conversion complete successfully!');
     } catch (err) {
@@ -26,11 +26,11 @@ export default function Home() {
 
   return (
     <main className="container">
-      <h1>JE2BE World Converter</h1>
-      <p>Convert your Minecraft worlds directly in your browser using WebAssembly and C++.</p>
+      <h1>Java & Bedrock to Console Converter</h1>
+      <p>Convert your Java or Bedrock world saves into Xbox 360 and PS3 formats using WebAssembly.</p>
       
       <div className="dropzone">
-        <p>Drop your world folder / save here</p>
+        <p>Drop your world folder / save / STFS container here</p>
         <button 
           onClick={handleConversionTest} 
           disabled={loading}
@@ -43,5 +43,5 @@ export default function Home() {
       <p className="status"><strong>Status:</strong> {status}</p>
     </main>
   );
-  }
+    }
     
