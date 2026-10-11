@@ -1,8 +1,8 @@
 import './globals.css';
 
 export const metadata = {
-  title: 'Java to Bedrock & Console World Converter',
-  description: 'Convert Minecraft Java Edition worlds to Bedrock and console formats in your browser.',
+  title: 'Java & Bedrock to Xbox 360 / PS3 World Converter',
+  description: 'Convert Minecraft Java and Bedrock worlds to legacy console formats (Xbox 360 & PS3) right in your browser.',
 };
 
 export default function RootLayout({ children }) {
@@ -11,5 +11,4 @@ export default function RootLayout({ children }) {
       <body>{children}</body>
     </html>
   );
-    }
-  
+}
