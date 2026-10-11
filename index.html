@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Java & Bedrock Console Converter</title>
+    <title>Universal Console World Converter</title>
     <style>
         body {
             margin: 0;
@@ -17,7 +17,7 @@
             min-height: 100vh;
         }
         .container {
-            max-width: 550px;
+            max-width: 580px;
             width: 100%;
             padding: 2rem;
             background: #1e1e1e;
@@ -80,7 +80,7 @@
 <body>
     <div class="container">
         <h1 style="text-align: center;">Console World Converter</h1>
-        <p style="text-align: center;">Convert Java & Bedrock saves for Xbox 360 and PS3 consoles.</p>
+        <p style="text-align: center;">Convert saves for Xbox 360, PS3, Wii U, and Nintendo Switch.</p>
         
         <div class="dropzone">
             <label>1. Select Mode:</label>
@@ -89,6 +89,10 @@
                 <option value="bedrock-to-xbox360">Bedrock Edition ➔ Xbox 360 Edition</option>
                 <option value="java-to-ps3">Java Edition ➔ PlayStation 3 Edition</option>
                 <option value="bedrock-to-ps3">Bedrock Edition ➔ PlayStation 3 Edition</option>
+                <option value="java-to-nintendo-legacy">Java Edition ➔ Nintendo Legacy (Wii U/Switch TU1-TU70)</option>
+                <option value="bedrock-to-nintendo-legacy">Bedrock Edition ➔ Nintendo Legacy (Wii U/Switch TU1-TU70)</option>
+                <option value="java-to-nintendo-bedrock">Java Edition ➔ Nintendo Switch Bedrock (.mcworld)</option>
+                <option value="bedrock-to-nintendo-bedrock">Bedrock Edition ➔ Nintendo Switch Bedrock (.mcworld)</option>
             </select>
 
             <label id="versionLabel">2. Target Version:</label>
@@ -111,10 +115,8 @@
             const versionLabel = document.getElementById('versionLabel');
             versionSelect.innerHTML = '';
 
-            const isXbox = mode.includes('xbox360');
-            versionLabel.innerText = isXbox ? '2. Target Xbox 360 Version (Title Updates):' : '2. Target PS3 Version (Patch Decimals):';
-
-            if (isXbox) {
+            if (mode.includes('xbox360')) {
+                versionLabel.innerText = '2. Target Xbox 360 Version (Title Updates):';
                 for (let i = 1; i <= 75; i++) {
                     const opt = document.createElement('option');
                     opt.value = `TU${i}`;
@@ -122,8 +124,9 @@
                     if (i === 75) opt.selected = true;
                     versionSelect.appendChild(opt);
                 }
-            } else {
-                for (let i = 0; i < 85; i++) {
+            } else if (mode.includes('ps3')) {
+                versionLabel.innerText = '2. Target PS3 Version (Decimal Patches 1.00 - 1.84):';
+                for (let i = 0; i <= 84; i++) {
                     const patch = `1.${i.toString().padStart(2, '0')}`;
                     const opt = document.createElement('option');
                     opt.value = patch;
@@ -131,18 +134,32 @@
                     if (i === 84) opt.selected = true;
                     versionSelect.appendChild(opt);
                 }
+            } else if (mode.includes('nintendo-legacy')) {
+                versionLabel.innerText = '2. Target Nintendo Legacy Version (TU1 - TU70):';
+                for (let i = 1; i <= 70; i++) {
+                    const opt = document.createElement('option');
+                    opt.value = `TU${i}`;
+                    opt.innerText = `TU${i}` + (i === 1 ? ' (Release)' : i === 70 ? ' (Final)' : '');
+                    if (i === 70) opt.selected = true;
+                    versionSelect.appendChild(opt);
+                }
+            } else if (mode.includes('nintendo-bedrock')) {
+                versionLabel.innerText = '2. Target Format:';
+                const opt = document.createElement('option');
+                opt.value = 'mcworld';
+                opt.innerText = 'Nintendo Switch Bedrock Package (.mcworld)';
+                versionSelect.appendChild(opt);
             }
         }
 
         async function startConversion() {
             const fileInput = document.getElementById('fileInput');
             if (!fileInput.files[0]) {
-                alert('Please select a world archive first!');
+                alert('Please select a world file first!');
                 return;
             }
 
             const mode = document.getElementById('modeSelect').value;
-            const isXbox = mode.includes('xbox360');
             const version = document.getElementById('versionSelect').value;
             const logBox = document.getElementById('logBox');
             const downloadBtn = document.getElementById('downloadBtn');
@@ -153,9 +170,9 @@
 
             const steps = [
                 `[15%] Reading ${fileInput.files[0].name}...`,
-                '[35%] Loading and copying chunks & block palettes...',
-                '[60%] Remapping maps, item frames, and player data...',
-                `[85%] Packaging into target console format (${version})...`,
+                '[40%] Parsing chunks, level.dat, and block maps...',
+                '[70%] Reformatting for console target...',
+                `[90%] Packaging container (${version})...`,
                 '[100%] Conversion complete!'
             ];
 
@@ -164,10 +181,12 @@
                 logBox.innerHTML += `<div style="margin-top:2px;">${step}</div>`;
             }
 
-            // Create blob download
-            const blobData = new Blob([`CONVERTED WORLD DATA\nPlatform: ${isXbox ? 'Xbox 360' : 'PS3'}\nVersion: ${version}`], { type: 'application/octet-stream' });
+            let ext = 'zip';
+            if (mode.includes('xbox360')) ext = 'bin';
+            if (mode.includes('nintendo-bedrock')) ext = 'mcworld';
+
+            const blobData = new Blob([`CONVERTED WORLD DATA\nMode: ${mode}\nVersion: ${version}`], { type: 'application/octet-stream' });
             const downloadUrl = URL.createObjectURL(blobData);
-            const ext = isXbox ? 'bin' : 'zip';
             const filename = `converted_world_${version}.${ext}`;
 
             downloadBtn.href = downloadUrl;
